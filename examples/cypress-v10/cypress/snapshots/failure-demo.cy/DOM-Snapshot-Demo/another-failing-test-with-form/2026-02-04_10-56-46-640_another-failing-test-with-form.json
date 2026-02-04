@@ -1,0 +1,51 @@
+{
+  "version": "1.0.0",
+  "timestamp": 1770199006640,
+  "timestampISO": "2026-02-04T09:56:46.640Z",
+  "test": {
+    "title": "another failing test with form",
+    "titlePath": [
+      "DOM Snapshot Demo",
+      "another failing test with form"
+    ],
+    "file": "cypress\\e2e\\failure-demo.cy.ts",
+    "duration": 4961,
+    "state": "failed",
+    "error": {
+      "message": "Timed out retrying after 4000ms: Expected to find element: `.nonexistent-submit-button`, but never found it.",
+      "stack": "AssertionError: Timed out retrying after 4000ms: Expected to find element: `.nonexistent-submit-button`, but never found it.\n    at Context.eval (webpack://cypress-dom-snapshot-example/./cypress/e2e/failure-demo.cy.ts:25:0)",
+      "name": "AssertionError"
+    }
+  },
+  "page": {
+    "url": "https://example.cypress.io/__cypress/iframes/cypress%5Ce2e%5Cfailure-demo.cy.ts?browserFamily=chromium",
+    "title": "cypress\\e2e\\failure-demo.cy.ts",
+    "viewport": {
+      "width": 0,
+      "height": 0
+    },
+    "scrollPosition": {
+      "x": 0,
+      "y": 0
+    },
+    "userAgent": "Node.js/22"
+  },
+  "dom": {
+    "elementCount": 10,
+    "iframeCount": 0,
+    "shadowDomCount": 0,
+    "hasExternalStyles": false,
+    "externalStylesheets": []
+  },
+  "cypress": {
+    "version": "13.17.0",
+    "browser": {
+      "name": "electron",
+      "version": "118.0.5993.159"
+    }
+  },
+  "snapshot": {
+    "htmlFile": "2026-02-04_10-56-46-640_another-failing-test-with-form.html",
+    "htmlSize": 81214
+  }
+}

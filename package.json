@@ -1,0 +1,77 @@
+{
+  "name": "cypress-dom-snapshot",
+  "version": "1.0.0",
+  "description": "Capture DOM snapshots automatically on Cypress test failures",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "browser": "dist/browser/commands.js",
+  "files": [
+    "dist",
+    "browser",
+    "cypress-dom-snapshot.d.ts"
+  ],
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./browser": {
+      "require": "./dist/browser/commands.js",
+      "import": "./dist/browser/commands.js"
+    },
+    "./dist/browser/commands": {
+      "require": "./dist/browser/commands.js",
+      "import": "./dist/browser/commands.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:watch": "tsc -p tsconfig.build.json --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "cypress",
+    "cypress-plugin",
+    "dom-snapshot",
+    "testing",
+    "e2e",
+    "debugging",
+    "test-failure",
+    "dom-capture"
+  ],
+  "author": "Chathuranga Jayasinghe",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/s-chathuranga-j/cypress-dom-snapshot"
+  },
+  "peerDependencies": {
+    "cypress": ">=10.0.0"
+  },
+  "dependencies": {
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.11.0",
+    "cypress": "^13.6.3",
+    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "jest": "^29.7.0",
+    "jsdom": "^24.0.0",
+    "prettier": "^3.2.4",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

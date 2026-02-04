@@ -1,0 +1,17 @@
+{
+  "name": "cypress-dom-snapshot-example",
+  "version": "1.0.0",
+  "description": "Example project demonstrating cypress-dom-snapshot plugin",
+  "scripts": {
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "test": "cypress run"
+  },
+  "devDependencies": {
+    "cypress": "^13.6.3",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "cypress-dom-snapshot": "file:../.."
+  }
+}

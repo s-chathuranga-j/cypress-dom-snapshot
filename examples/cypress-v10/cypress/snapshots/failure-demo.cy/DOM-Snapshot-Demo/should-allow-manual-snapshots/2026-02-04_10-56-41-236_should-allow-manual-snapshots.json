@@ -1,0 +1,46 @@
+{
+  "version": "1.0.0",
+  "timestamp": 1770199001236,
+  "timestampISO": "2026-02-04T09:56:41.236Z",
+  "test": {
+    "title": "should allow manual snapshots",
+    "titlePath": [
+      "DOM Snapshot Demo",
+      "should allow manual snapshots"
+    ],
+    "file": "cypress\\e2e\\failure-demo.cy.ts",
+    "duration": 0,
+    "state": "after-navigation"
+  },
+  "page": {
+    "url": "https://example.cypress.io/__cypress/iframes/cypress%5Ce2e%5Cfailure-demo.cy.ts?browserFamily=chromium",
+    "title": "cypress\\e2e\\failure-demo.cy.ts",
+    "viewport": {
+      "width": 0,
+      "height": 0
+    },
+    "scrollPosition": {
+      "x": 0,
+      "y": 0
+    },
+    "userAgent": "Node.js/22"
+  },
+  "dom": {
+    "elementCount": 10,
+    "iframeCount": 0,
+    "shadowDomCount": 0,
+    "hasExternalStyles": false,
+    "externalStylesheets": []
+  },
+  "cypress": {
+    "version": "13.17.0",
+    "browser": {
+      "name": "electron",
+      "version": "118.0.5993.159"
+    }
+  },
+  "snapshot": {
+    "htmlFile": "2026-02-04_10-56-41-236_should-allow-manual-snapshots.html",
+    "htmlSize": 81214
+  }
+}
