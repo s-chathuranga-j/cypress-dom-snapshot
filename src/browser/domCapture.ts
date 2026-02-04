@@ -1,14 +1,25 @@
-import { DOMSnapshot, IframeSnapshot, ShadowDomSnapshot, PageMetadata, SerializationOptions } from '../plugin/types';
+import {
+  DOMSnapshot,
+  IframeSnapshot,
+  ShadowDomSnapshot,
+  PageMetadata,
+  SerializationOptions
+} from '../plugin/types';
 import { serializeWithStyles, getUniqueSelector } from './htmlSerializer';
 
 export function captureFullDOM(options: SerializationOptions = {}): DOMSnapshot {
   const timestamp = Date.now();
-  const url = window.location.href;
+  const docToCapture = resolveAutDocument();
 
-  const enrichedHTML = serializeWithStyles(document.documentElement, options);
+  const win = (docToCapture.defaultView as Window | null) || window;
+  const url = win.location.href;
 
-  const iframes = options.includeComputedStyles !== false ? captureIframes(options) : [];
-  const shadowDoms = options.includeComputedStyles !== false ? captureShadowDom(options) : [];
+  const enrichedHTML = serializeWithStyles(docToCapture.documentElement, options);
+
+  const iframes =
+    options.includeComputedStyles !== false ? captureIframes(docToCapture, options) : [];
+  const shadowDoms =
+    options.includeComputedStyles !== false ? captureShadowDom(docToCapture, options) : [];
 
   return {
     timestamp,
@@ -16,12 +27,41 @@ export function captureFullDOM(options: SerializationOptions = {}): DOMSnapshot 
     html: enrichedHTML,
     iframes,
     shadowDoms,
-    metadata: captureMetadata()
+    metadata: captureMetadata(docToCapture)
   };
 }
 
-function captureIframes(options: SerializationOptions): IframeSnapshot[] {
-  const iframes = Array.from(document.querySelectorAll('iframe'));
+function resolveAutDocument(): Document {
+  try {
+    const currentWin = window as any as Window;
+    const candidateWindows: Window[] = [currentWin];
+
+    if (currentWin.parent && currentWin.parent !== currentWin) {
+      candidateWindows.push(currentWin.parent);
+    }
+    if (currentWin.top && currentWin.top !== currentWin && currentWin.top !== currentWin.parent) {
+      candidateWindows.push(currentWin.top);
+    }
+
+    for (const win of candidateWindows) {
+      const doc = win.document;
+      const autIframe = doc.querySelector(
+        'iframe[data-cy=\"aut-iframe\"]'
+      ) as HTMLIFrameElement | null;
+
+      if (autIframe?.contentDocument) {
+        return autIframe.contentDocument;
+      }
+    }
+  } catch {
+    // Fallback to current document when we can't safely inspect parent/top
+  }
+
+  return document;
+}
+
+function captureIframes(rootDoc: Document, options: SerializationOptions): IframeSnapshot[] {
+  const iframes = Array.from(rootDoc.querySelectorAll('iframe'));
   return iframes.map((iframe, index) => {
     try {
       const doc = iframe.contentDocument || iframe.contentWindow?.document;
@@ -51,8 +91,8 @@ function captureIframes(options: SerializationOptions): IframeSnapshot[] {
   });
 }
 
-function captureShadowDom(options: SerializationOptions): ShadowDomSnapshot[] {
-  const shadowHosts = findShadowHosts(document.body);
+function captureShadowDom(rootDoc: Document, options: SerializationOptions): ShadowDomSnapshot[] {
+  const shadowHosts = findShadowHosts(rootDoc);
   return shadowHosts.map(host => {
     const shadowRoot = host.shadowRoot;
     if (!shadowRoot) {
@@ -86,7 +126,10 @@ function captureShadowDom(options: SerializationOptions): ShadowDomSnapshot[] {
   });
 }
 
-function findShadowHosts(root: Element): Element[] {
+function findShadowHosts(rootDoc: Document): Element[] {
+  const root = rootDoc.body;
+  if (!root) return [];
+
   const hosts: Element[] = [];
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, null);
 
@@ -99,19 +142,21 @@ function findShadowHosts(root: Element): Element[] {
   return hosts;
 }
 
-function captureMetadata(): PageMetadata {
+function captureMetadata(doc: Document): PageMetadata {
+  const win = (doc.defaultView as Window | null) || window;
+
   return {
-    pageTitle: document.title,
+    pageTitle: doc.title,
     viewport: {
-      width: window.innerWidth,
-      height: window.innerHeight
+      width: win.innerWidth,
+      height: win.innerHeight
     },
     scrollPosition: {
-      x: window.scrollX,
-      y: window.scrollY
+      x: win.scrollX,
+      y: win.scrollY
     },
     externalStylesheets: Array.from(
-      document.querySelectorAll('link[rel="stylesheet"]')
+      doc.querySelectorAll('link[rel=\"stylesheet\"]')
     ).map(link => (link as HTMLLinkElement).href)
   };
 }
