@@ -254,12 +254,83 @@ domSnapshotPlugin(on, cypressConfig, config);
 6. **File Writing**: Node process writes HTML and JSON files
 7. **Organization**: Files organized by test hierarchy
 
+## Works with ANY Site via cy.visit()
+
+The plugin works seamlessly with **all sites visited via `cy.visit()`** - including localhost, staging, and production sites:
+
+- ✅ Full HTML with inline styles
+- ✅ Same-origin iframes
+- ✅ Shadow DOM (open mode)
+- ✅ Complete metadata (viewport, scroll position, etc.)
+
+### Localhost Development
+The plugin intelligently treats `localhost` and `127.0.0.1` with different ports as same-origin. Even if Cypress runs on `localhost:64874` and your app runs on `localhost:3000`, full DOM capture works perfectly.
+
+```typescript
+// cypress.config.ts
+export default defineConfig({
+  e2e: {
+    baseUrl: 'http://localhost:3000', // Your local app
+  }
+});
+
+// Your test
+it('should capture localhost page', () => {
+  cy.visit('/');
+  cy.get('#username').type('testuser');
+
+  // Full DOM capture with all features
+  cy.captureSnapshot('localhost-page');
+});
+```
+
+### External Sites
+**Great news!** The plugin also works with external websites when visited via `cy.visit()`:
+
+```typescript
+it('should capture external site', () => {
+  cy.visit('https://www.saucedemo.com');
+  cy.get('#user-name').type('standard_user');
+
+  // Full DOM capture works! ✅
+  cy.captureSnapshot('login-page');
+});
+```
+
+**Why it works:** When you use `cy.visit(url)`, Cypress changes its spec iframe origin to match the visited site. This gives the plugin full DOM access without any browser security restrictions.
+
+**Full DOM capture works for:**
+- ✅ `http://localhost:3000` - localhost (any port)
+- ✅ `http://127.0.0.1:5173` - local IP (any port)
+- ✅ `https://www.saucedemo.com` - external sites via `cy.visit()`
+- ✅ `https://example.com` - any site visited via `cy.visit()`
+- ✅ **No `chromeWebSecurity: false` needed!**
+
+## Multi-Origin Testing Limitations
+
+The **only limitation** is when testing across MULTIPLE origins in ONE test using `cy.origin()`:
+
+```typescript
+it('multi-origin test', () => {
+  cy.visit('https://app.com');
+  cy.captureSnapshot('app'); // ✅ Works perfectly
+
+  // Switch to a different origin in the same test
+  cy.origin('https://api.com', () => {
+    cy.visit('/');
+    cy.captureSnapshot('api'); // ⚠️ Limited - captures spec bridge only
+  });
+});
+```
+
+For 99% of tests (single origin per test), full DOM capture works perfectly.
+
 ## Limitations
 
-- **Iframes**: Only same-origin iframes can be captured (browser security)
 - **Shadow DOM**: Only open shadow roots accessible
 - **File Size**: Very large DOMs may exceed `maxSnapshotSize`
 - **Dynamic Content**: Snapshots are point-in-time captures
+- **Cross-Origin Iframes**: Iframes with different origins than the parent page cannot be captured (browser security)
 
 ## Troubleshooting
 
@@ -278,9 +349,13 @@ Reduce size by:
 - Disabling `includePseudoElements`
 - Adjusting `maxSnapshotSize`
 
-### Cross-Origin Iframes
+### Testing External Sites
 
-Cross-origin iframes cannot be captured due to browser security. The snapshot will include metadata about the iframe but not its content.
+Full DOM capture works for any site visited via `cy.visit()`, including external sites like `https://www.saucedemo.com`. No special configuration needed - just visit the site normally and snapshots will capture the complete DOM.
+
+### Multi-Origin Testing
+
+If you're using `cy.origin()` to test across multiple origins in a single test, note that snapshots inside `cy.origin()` callbacks will capture limited data (Cypress spec bridge only). For full DOM capture, keep tests to a single origin per test file.
 
 ## Examples
 

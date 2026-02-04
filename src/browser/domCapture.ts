@@ -7,19 +7,22 @@ import {
 } from '../plugin/types';
 import { serializeWithStyles, getUniqueSelector } from './htmlSerializer';
 
-export function captureFullDOM(options: SerializationOptions = {}): DOMSnapshot {
+export function captureFullDOM(
+  options: SerializationOptions = {},
+  doc?: Document,
+  win?: Window
+): DOMSnapshot {
   const timestamp = Date.now();
-  const docToCapture = resolveAutDocument();
+  const docToCapture = doc || document;
+  const winToUse = win || window;
+  const url = winToUse.location.href;
 
-  const win = (docToCapture.defaultView as Window | null) || window;
-  const url = win.location.href;
-
-  const enrichedHTML = serializeWithStyles(docToCapture.documentElement, options);
+  const enrichedHTML = serializeWithStyles(docToCapture.documentElement, options, docToCapture, winToUse);
 
   const iframes =
     options.includeComputedStyles !== false ? captureIframes(docToCapture, options) : [];
   const shadowDoms =
-    options.includeComputedStyles !== false ? captureShadowDom(docToCapture, options) : [];
+    options.includeComputedStyles !== false ? captureShadowDom(docToCapture, options, docToCapture) : [];
 
   return {
     timestamp,
@@ -27,37 +30,8 @@ export function captureFullDOM(options: SerializationOptions = {}): DOMSnapshot 
     html: enrichedHTML,
     iframes,
     shadowDoms,
-    metadata: captureMetadata(docToCapture)
+    metadata: captureMetadata(docToCapture, winToUse)
   };
-}
-
-function resolveAutDocument(): Document {
-  try {
-    const currentWin = window as any as Window;
-    const candidateWindows: Window[] = [currentWin];
-
-    if (currentWin.parent && currentWin.parent !== currentWin) {
-      candidateWindows.push(currentWin.parent);
-    }
-    if (currentWin.top && currentWin.top !== currentWin && currentWin.top !== currentWin.parent) {
-      candidateWindows.push(currentWin.top);
-    }
-
-    for (const win of candidateWindows) {
-      const doc = win.document;
-      const autIframe = doc.querySelector(
-        'iframe[data-cy=\"aut-iframe\"]'
-      ) as HTMLIFrameElement | null;
-
-      if (autIframe?.contentDocument) {
-        return autIframe.contentDocument;
-      }
-    }
-  } catch {
-    // Fallback to current document when we can't safely inspect parent/top
-  }
-
-  return document;
 }
 
 function captureIframes(rootDoc: Document, options: SerializationOptions): IframeSnapshot[] {
@@ -91,8 +65,8 @@ function captureIframes(rootDoc: Document, options: SerializationOptions): Ifram
   });
 }
 
-function captureShadowDom(rootDoc: Document, options: SerializationOptions): ShadowDomSnapshot[] {
-  const shadowHosts = findShadowHosts(rootDoc);
+function captureShadowDom(rootDoc: Document, options: SerializationOptions, doc: Document): ShadowDomSnapshot[] {
+  const shadowHosts = findShadowHosts(rootDoc, doc);
   return shadowHosts.map(host => {
     const shadowRoot = host.shadowRoot;
     if (!shadowRoot) {
@@ -104,7 +78,7 @@ function captureShadowDom(rootDoc: Document, options: SerializationOptions): Sha
     }
 
     try {
-      const container = document.createElement('div');
+      const container = doc.createElement('div');
       Array.from(shadowRoot.childNodes).forEach(node => {
         container.appendChild(node.cloneNode(true));
       });
@@ -126,12 +100,12 @@ function captureShadowDom(rootDoc: Document, options: SerializationOptions): Sha
   });
 }
 
-function findShadowHosts(rootDoc: Document): Element[] {
+function findShadowHosts(rootDoc: Document, doc: Document): Element[] {
   const root = rootDoc.body;
   if (!root) return [];
 
   const hosts: Element[] = [];
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, null);
+  const walker = doc.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, null);
 
   let node: Node | null;
   while ((node = walker.nextNode())) {
@@ -142,18 +116,18 @@ function findShadowHosts(rootDoc: Document): Element[] {
   return hosts;
 }
 
-function captureMetadata(doc: Document): PageMetadata {
-  const win = (doc.defaultView as Window | null) || window;
+function captureMetadata(doc: Document, win?: Window): PageMetadata {
+  const winToUse = win || (doc.defaultView as Window | null) || window;
 
   return {
     pageTitle: doc.title,
     viewport: {
-      width: win.innerWidth,
-      height: win.innerHeight
+      width: winToUse.innerWidth,
+      height: winToUse.innerHeight
     },
     scrollPosition: {
-      x: win.scrollX,
-      y: win.scrollY
+      x: winToUse.scrollX,
+      y: winToUse.scrollY
     },
     externalStylesheets: Array.from(
       doc.querySelectorAll('link[rel=\"stylesheet\"]')

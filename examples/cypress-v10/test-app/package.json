@@ -1,0 +1,11 @@
+{
+  "name": "test-app",
+  "version": "1.0.0",
+  "description": "Simple test app for Cypress DOM Snapshot localhost testing",
+  "scripts": {
+    "start": "npx http-server . -p 3000 -c-1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

@@ -1,14 +1,14 @@
 {
   "name": "cypress-dom-snapshot",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Capture DOM snapshots automatically on Cypress test failures",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "browser": "dist/browser/commands.js",
   "files": [
     "dist",
-    "browser",
-    "cypress-dom-snapshot.d.ts"
+    "README.md",
+    "LICENSE"
   ],
   "exports": {
     ".": {

@@ -2,7 +2,9 @@ import { SerializationOptions } from '../plugin/types';
 
 export function serializeWithStyles(
   root: HTMLElement,
-  options: SerializationOptions = {}
+  options: SerializationOptions = {},
+  doc?: Document,
+  win?: Window
 ): string {
   const {
     includeComputedStyles = true,
@@ -11,13 +13,15 @@ export function serializeWithStyles(
   } = options;
 
   const clone = root.cloneNode(true) as HTMLElement;
+  const docToUse = doc || document;
+  const winToUse = win || window;
 
   if (includeComputedStyles) {
-    inlineAllStyles(clone, root, propertiesToInclude);
+    inlineAllStyles(clone, root, propertiesToInclude, docToUse, winToUse);
   }
 
   if (includePseudoElements) {
-    capturePseudoElements(clone, root);
+    capturePseudoElements(clone, root, docToUse, winToUse);
   }
 
   return clone.outerHTML;
@@ -26,13 +30,15 @@ export function serializeWithStyles(
 function inlineAllStyles(
   cloneRoot: HTMLElement,
   originalRoot: HTMLElement,
-  propertiesToInclude: string[] | null
+  propertiesToInclude: string[] | null,
+  doc: Document,
+  win: Window
 ): void {
-  const cloneWalker = document.createTreeWalker(
+  const cloneWalker = doc.createTreeWalker(
     cloneRoot,
     NodeFilter.SHOW_ELEMENT
   );
-  const originalWalker = document.createTreeWalker(
+  const originalWalker = doc.createTreeWalker(
     originalRoot,
     NodeFilter.SHOW_ELEMENT
   );
@@ -48,7 +54,7 @@ function inlineAllStyles(
       const cloneEl = cloneNode as HTMLElement;
       const originalEl = originalNode as HTMLElement;
 
-      const computed = window.getComputedStyle(originalEl);
+      const computed = win.getComputedStyle(originalEl);
       const inlineStyle: string[] = [];
 
       const properties = propertiesToInclude || Array.from(computed);
@@ -69,9 +75,11 @@ function inlineAllStyles(
 
 function capturePseudoElements(
   cloneRoot: HTMLElement,
-  originalRoot: HTMLElement
+  originalRoot: HTMLElement,
+  doc: Document,
+  win: Window
 ): void {
-  const walker = document.createTreeWalker(
+  const walker = doc.createTreeWalker(
     originalRoot,
     NodeFilter.SHOW_ELEMENT
   );
@@ -85,8 +93,8 @@ function capturePseudoElements(
 
   while ((node = walker.nextNode())) {
     const el = node as HTMLElement;
-    const before = window.getComputedStyle(el, '::before');
-    const after = window.getComputedStyle(el, '::after');
+    const before = win.getComputedStyle(el, '::before');
+    const after = win.getComputedStyle(el, '::after');
 
     const selector = getUniqueSelector(el);
     const data: any = { selector };

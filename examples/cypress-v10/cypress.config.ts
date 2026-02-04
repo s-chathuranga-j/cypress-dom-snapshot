@@ -3,9 +3,10 @@ import { domSnapshotPlugin } from 'cypress-dom-snapshot';
 
 export default defineConfig({
   e2e: {
-    baseUrl: 'https://example.cypress.io',
+    baseUrl: 'http://www.saucedemo.com',
     specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     supportFile: 'cypress/support/e2e.ts',
+    experimentalOriginDependencies: true,
 
     setupNodeEvents(on, config) {
       domSnapshotPlugin(on, config, {

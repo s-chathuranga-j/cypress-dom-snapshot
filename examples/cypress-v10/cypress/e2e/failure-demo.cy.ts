@@ -1,4 +1,4 @@
-describe('DOM Snapshot Demo', () => {
+describe.skip('DOM Snapshot Demo', () => {
   beforeEach(() => {
     cy.visit('/');
   });

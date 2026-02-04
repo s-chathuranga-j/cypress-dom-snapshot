@@ -1,0 +1,37 @@
+# Source and development files
+src/
+tests/
+examples/
+.claude/
+
+# Configuration
+tsconfig.json
+tsconfig.build.json
+jest.config.js
+.gitignore
+.npmignore
+
+# Documentation (keep only README.md in npm)
+CHANGELOG.md
+
+# Development
+*.log
+coverage/
+.nyc_output/
+node_modules/
+package-lock.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
