@@ -12,7 +12,8 @@ declare global {
 }
 
 Cypress.Commands.add('captureSnapshot', (label?: string) => {
-  const config: SnapshotPluginConfig = Cypress.env('domSnapshotConfig') || {};
+  const env = Cypress.config('env') as any;
+  const config: SnapshotPluginConfig = env?.domSnapshotConfig || {};
 
   const snapshot = captureFullDOM({
     includeComputedStyles: config.includeStyles !== false,
@@ -49,7 +50,8 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-  const config: SnapshotPluginConfig = Cypress.env('domSnapshotConfig') || {};
+  const env = Cypress.config('env') as any;
+  const config: SnapshotPluginConfig = env?.domSnapshotConfig || {};
 
   if (!this.currentTest) return;
 
