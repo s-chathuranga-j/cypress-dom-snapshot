@@ -4,7 +4,7 @@
 
 ### Package Information
 - **Name:** cypress-dom-snapshot
-- **Version:** 1.0.3
+- **Version:** 1.1.0
 - **Package Size:** 16.8 kB (compressed)
 - **Unpacked Size:** 72.8 kB
 - **Total Files:** 36
@@ -28,7 +28,7 @@
 #### Files Updated ✅
 - ✅ `.gitignore` - Added `.claude/` directory
 - ✅ `package.json`:
-  - Version: `1.0.2` → `1.0.3`
+  - Version: `1.0.3` → `1.1.0`
   - Files field: `["dist", "README.md", "LICENSE"]`
 
 #### Directories Cleaned ✅
@@ -41,7 +41,7 @@
 The npm package contains **only essential files**:
 
 ```
-cypress-dom-snapshot@1.0.3/
+cypress-dom-snapshot@1.1.0/
 ├── dist/                    # Compiled JavaScript + TypeScript definitions
 │   ├── browser/            # Browser-side code
 │   │   ├── commands.js/.d.ts
@@ -104,7 +104,7 @@ All checks passed:
 - ✅ Type definitions included: All .d.ts files present
 - ✅ LICENSE file included: MIT License
 - ✅ README documentation: Complete and updated
-- ✅ Version bumped: 1.0.2 → 1.0.3
+- ✅ Version bumped: 1.0.3 → 1.1.0
 
 ## Publishing Commands
 
@@ -117,7 +117,7 @@ npm pack
 
 # Install in a test project
 cd /path/to/test-project
-npm install /path/to/cypress-dom-snapshot-1.0.3.tgz
+npm install /path/to/cypress-dom-snapshot-1.1.0.tgz
 ```
 
 ### 2. Publish to npm
@@ -146,13 +146,13 @@ npm install cypress-dom-snapshot
 1. **Create Git Tag:**
    ```bash
    git add .
-   git commit -m "Release v1.0.3 - DOM snapshot fix for all sites"
-   git tag v1.0.3
+   git commit -m "Release v1.1.0 - Cucumber preprocessor compatibility"
+   git tag v1.1.0
    git push origin main --tags
    ```
 
 2. **Update GitHub Release:**
-   - Create release from tag v1.0.3
+   - Create release from tag v1.1.0
    - Copy changelog from CHANGELOG.md
    - Highlight key improvements
 
@@ -160,14 +160,22 @@ npm install cypress-dom-snapshot
    - Ensure README on GitHub matches npm package
    - Update any external documentation links
 
-## Package Features (v1.0.3)
+## Package Features (v1.1.0)
 
-This release includes the major DOM capture fix:
+This release includes major compatibility improvements and new features:
 
-✅ **Works with ALL sites via `cy.visit()`**
+✅ **Cucumber Preprocessor Compatibility**
+- Resolved conflicts with `@badeball/cypress-cucumber-preprocessor` and other plugins using `after:spec`.
+- Added `skipHooks` option to disable automatic hook registration.
+- Added `handleAfterSpec` manual handler for full control.
+
+✅ **Improved Event Registration**
+- Plugin now only registers `after:spec` when necessary (if `afterSnapshot` is provided).
+
+✅ **All Features from v1.0.3**
+- Works with ALL sites via `cy.visit()`
 - Localhost development (any port)
-- External websites (saucedemo.com, example.com, etc.)
-- No `chromeWebSecurity: false` needed
+- External websites
 - Full DOM capture with inline styles
 - Accurate viewport dimensions
 - Complete metadata collection
