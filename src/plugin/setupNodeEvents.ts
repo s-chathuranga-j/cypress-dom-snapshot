@@ -13,26 +13,17 @@ export function setupSnapshotPlugin(
   const snapshotDir = path.resolve(config.projectRoot, pluginConfig.snapshotDir);
 
   const manager = new SnapshotManager(snapshotDir, pluginConfig);
+  
+  // Only register after:spec if afterSnapshot hook is provided and skipHooks is false.
+  // This avoids conflicts with other plugins that also use after:spec (like cucumber-preprocessor)
+  if (pluginConfig.afterSnapshot && !pluginConfig.skipHooks) {
+    on('after:spec', async (spec, results) => {
+      if (!results) return;
 
-  on('after:spec', async (spec, results) => {
-    if (!results) return;
-
-    const failedTests =
-      results.tests?.filter(test => {
-        return test.attempts.some(attempt => attempt.state === 'failed');
-      }) || [];
-
-    if (pluginConfig.verbose && failedTests.length > 0) {
-      console.log(
-        `[DOM Snapshot] Found ${failedTests.length} failed test(s) in ${spec.relative}`
-      );
-    }
-
-    if (pluginConfig.afterSnapshot) {
       const snapshotFiles = await manager.getSnapshotFilesForSpec(spec.relative);
-      await pluginConfig.afterSnapshot(snapshotFiles);
-    }
-  });
+      await pluginConfig.afterSnapshot!(snapshotFiles);
+    });
+  }
 
   on('task', {
     'domSnapshot:capture': async (data: {
@@ -80,4 +71,24 @@ export function setupSnapshotPlugin(
 
   config.env = config.env || {};
   config.env.domSnapshotConfig = pluginConfig;
+}
+
+/**
+ * Manual handler for after:spec event.
+ * Use this if you have conflicts with other plugins and want to call the logic manually.
+ */
+export async function handleAfterSpec(
+  spec: Cypress.Spec,
+  results: any,
+  config: Cypress.PluginConfigOptions,
+  userConfig: SnapshotPluginConfig = {}
+): Promise<void> {
+  const pluginConfig = { ...DEFAULT_CONFIG, ...userConfig };
+  
+  if (pluginConfig.afterSnapshot) {
+    const snapshotDir = path.resolve(config.projectRoot, pluginConfig.snapshotDir);
+    const manager = new SnapshotManager(snapshotDir, pluginConfig);
+    const snapshotFiles = await manager.getSnapshotFilesForSpec(spec.relative);
+    await pluginConfig.afterSnapshot(snapshotFiles);
+  }
 }

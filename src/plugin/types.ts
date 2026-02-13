@@ -85,6 +85,13 @@ export interface SnapshotPluginConfig {
    * Hook called after snapshot is saved
    */
   afterSnapshot?: (filePaths: string[]) => void | Promise<void>;
+
+  /**
+   * Skip automatic registration of Cypress hooks (after:spec, etc.)
+   * Useful when using with other plugins that conflict (like cucumber)
+   * @default false
+   */
+  skipHooks?: boolean;
 }
 
 export interface DOMSnapshot {
@@ -214,5 +221,6 @@ export const DEFAULT_CONFIG: Required<Omit<
   captureIframes: true,
   captureShadowDom: true,
   maxSnapshotSize: 50 * 1024 * 1024, // 50MB
-  verbose: true
+  verbose: true,
+  skipHooks: false
 };

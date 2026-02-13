@@ -1,3 +1,17 @@
+# Changelog
+
+## [1.1.0] - 2026-02-13
+
+### Added
+- `skipHooks` configuration option to disable automatic registration of `after:spec` hook.
+- `handleAfterSpec` manual handler to resolve event-handler conflicts with other plugins (e.g., `@badeball/cypress-cucumber-preprocessor`).
+
+### Changed
+- Improved `after:spec` registration: it is now only registered if `afterSnapshot` hook is provided and `skipHooks` is false.
+- Exported `handleAfterSpec` from the main entry point.
+
+---
+
 # DOM Snapshot Fix Summary
 
 ## Problem

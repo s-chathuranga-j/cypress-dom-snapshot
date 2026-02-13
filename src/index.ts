@@ -9,6 +9,8 @@ export function domSnapshotPlugin(
   return setupSnapshotPlugin(on, config, userConfig);
 }
 
+export { handleAfterSpec } from './plugin/setupNodeEvents';
+
 export * from './plugin/types';
 
 module.exports = domSnapshotPlugin;

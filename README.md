@@ -12,6 +12,7 @@ Automatically capture DOM snapshots when Cypress tests fail. Save complete HTML 
 - **Iframe Support**: Captures same-origin iframe content
 - **Shadow DOM**: Captures open shadow DOM content
 - **TypeScript**: Full TypeScript support with type definitions
+- **Cucumber Support**: Safe integration with `@badeball/cypress-cucumber-preprocessor`
 
 ## Installation
 
@@ -192,6 +193,7 @@ Comprehensive metadata about the test and page state:
 | `fileNameGenerator` | `function` | Built-in | Custom file naming |
 | `beforeSnapshot` | `function` | - | Pre-save hook |
 | `afterSnapshot` | `function` | - | Post-save hook |
+| `skipHooks` | `boolean` | `false` | Skip automatic hook registration |
 
 ## Advanced Usage
 
@@ -228,6 +230,60 @@ domSnapshotPlugin(on, config, {
   }
 });
 ```
+
+### Using with Cucumber Preprocessor (@badeball)
+
+If you also use `@badeball/cypress-cucumber-preprocessor`, you may have seen event-handler conflicts in other plugins. This plugin avoids conflicts by default:
+
+- By default, no `after:spec` handler is registered unless you provide an `afterSnapshot` hook.
+- You can force-disable all automatic hook registrations using `skipHooks: true`.
+- You can call our `handleAfterSpec()` manually from your own `after:spec` handler.
+
+Option A — Let this plugin auto-register `after:spec` only when needed:
+
+```ts
+import { defineConfig } from 'cypress';
+import { domSnapshotPlugin } from 'cypress-dom-snapshot';
+
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      domSnapshotPlugin(on, config, {
+        afterSnapshot: async (files) => {/* do something */}
+      });
+    }
+  }
+});
+```
+
+Option B — If you already manage `after:spec` (for example, via Cucumber), disable hooks and call our handler manually:
+
+```ts
+import { defineConfig } from 'cypress';
+import { domSnapshotPlugin, handleAfterSpec } from 'cypress-dom-snapshot';
+
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      // Do not register our internal hooks automatically
+      domSnapshotPlugin(on, config, {
+        skipHooks: true,
+        afterSnapshot: async (files) => {/* do something */}
+      });
+
+      on('after:spec', async (spec, results) => {
+        // Delegate to the plugin's manual handler
+        await handleAfterSpec(spec, results, config, {
+          // repeat only the options you need here (optional)
+          afterSnapshot: async (files) => {/* do something */}
+        });
+      });
+    }
+  }
+});
+```
+
+Tip: If you prefer, you can also use the community `cypress-on-fix` wrapper to multiplex event handlers from multiple plugins.
 
 ## TypeScript Support
 
